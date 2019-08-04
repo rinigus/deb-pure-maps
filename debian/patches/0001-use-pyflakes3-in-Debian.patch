@@ -15,7 +15,7 @@ index adc1920..de26eee 100644
  
  check:
 -	pyflakes geocoders guides poor routers
-+	pyflakes3 geocoders guides poor routers
++	python3 -m flakes geocoders guides poor routers
  	find . -type f -name "*.json" -exec jsonlint -q {} \;
  
  clean:

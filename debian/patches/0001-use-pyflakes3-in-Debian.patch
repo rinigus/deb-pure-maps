@@ -7,7 +7,7 @@ Subject: use pyflakes3 in Debian
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/Makefile b/Makefile
-index adc1920..de26eee 100644
+index adc1920..86a4600 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -26,7 +26,7 @@ define install-translation =

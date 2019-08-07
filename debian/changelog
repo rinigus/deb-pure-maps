@@ -1,3 +1,13 @@
+pure-maps (1.22.0-1) unstable; urgency=medium
+
+  * rename pyflakes to pyflakes3
+  * update pyflakes command
+  * correct pyflakes module name
+  * update patches
+  * update debian scripts
+
+ -- Rinigus <rinigus.git@gmail.com>  Wed, 07 Aug 2019 23:57:50 +0300
+
 pure-maps (1.20.0-1) unstable; urgency=medium
 
   * Initial release

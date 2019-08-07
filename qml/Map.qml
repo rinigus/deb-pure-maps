@@ -36,17 +36,16 @@ MapboxMap {
         if (app.mode === modes.followMe) return 60;
         return 0; // should never get here
     }
-    pixelRatio: app.styler.themePixelRatio * 1.5
+    pixelRatio: styler.themePixelRatio * 1.5
     zoomLevel: 4.0
-
-    // Token for Mapbox.com-hosted maps, i.e. sources with mapbox:// URLs.
-    // accessToken is specified on loading Map in RootPage
 
     property int    animationTime: {
         if (!map.ready) return 0;
         if (app.mode === modes.explore || app.mode === modes.exploreRoute)
             return 1000;
-        return gps.timePerUpdate;
+        // support smooth animations for position marker
+        // and map center only if GPS is accurate
+        return (gps.accurate ? gps.timePerUpdate : 0);
     }
     property bool   autoCenter: false
     property bool   autoRotate: false
@@ -176,6 +175,32 @@ MapboxMap {
         }
     }
 
+    Timer {
+        // daytime bias timer
+        interval: 1000*60
+        repeat: true
+        running: app.conf.basemapAutoLight==="sunrise/sunset" && position.latitudeValid && position.longitudeValid //false
+
+        property bool lastLight: false
+
+        Component.onCompleted: update(true)
+        onRunningChanged: update(true)
+        onTriggered: update()
+
+        function update(force) {
+            if (app.conf.basemapAutoLight!=="sunrise/sunset" || !position.latitudeValid || !position.longitudeValid)
+                return;
+            py.call("poor.app.sun.day", [position.coordinate.latitude,
+                                         position.coordinate.longitude],
+                    function(light) {
+                        if (force || lastLight !== light) {
+                            py.call("poor.app.basemap.set_bias", [{'light': light ? 'day' : 'night'}]);
+                            lastLight = light;
+                        }
+                    });
+        }
+    }
+
     Connections {
         target: app
         onModeChanged: setMode()
@@ -251,25 +276,32 @@ MapboxMap {
         map.autoCenter && map.centerOnPosition();
     }
 
+    onStyleJsonChanged: {
+        py.call("poor.app.basemap.process_style", [styleJson],
+                function (style) {
+                    if (style) styleJson = style;
+                });
+    }
+
     function _addManeuver(maneuver) {
         // Add new maneuver marker to the map.
         map.maneuvers.push({
-            "arrive_instruction": maneuver.arrive_instruction || "",
-            "depart_instruction": maneuver.depart_instruction || "",
-            "coordinate": QtPositioning.coordinate(maneuver.y, maneuver.x),
-            "duration": maneuver.duration || 0,
-            "icon": maneuver.icon || "flag",
-            // Needed to have separate layers via filters.
-            "name": maneuver.passive ? "passive" : "active",
-            "narrative": maneuver.narrative || "",
-            "passive": maneuver.passive || false,
-            "sign": maneuver.sign || undefined,
-            "street": maneuver.street|| undefined,
-            "travel_type": maneuver.travel_type || "",
-            "verbal_alert": maneuver.verbal_alert || "",
-            "verbal_post": maneuver.verbal_post || "",
-            "verbal_pre": maneuver.verbal_pre || "",
-        });
+                               "arrive_instruction": maneuver.arrive_instruction || "",
+                               "depart_instruction": maneuver.depart_instruction || "",
+                               "coordinate": QtPositioning.coordinate(maneuver.y, maneuver.x),
+                               "duration": maneuver.duration || 0,
+                               "icon": maneuver.icon || "flag",
+                               // Needed to have separate layers via filters.
+                               "name": maneuver.passive ? "passive" : "active",
+                               "narrative": maneuver.narrative || "",
+                               "passive": maneuver.passive || false,
+                               "sign": maneuver.sign || undefined,
+                               "street": maneuver.street|| undefined,
+                               "travel_type": maneuver.travel_type || "",
+                               "verbal_alert": maneuver.verbal_alert || "",
+                               "verbal_post": maneuver.verbal_post || "",
+                               "verbal_pre": maneuver.verbal_pre || "",
+                           });
     }
 
     function addManeuvers(maneuvers) {
@@ -282,7 +314,6 @@ MapboxMap {
 
     function addRoute(route, amend) {
         // Add new route polyline to the map.
-        if (!amend) app.setModeExploreRoute();
         map.clearRoute();
         route.coordinates = route.x.map(function(value, i) {
             return QtPositioning.coordinate(route.y[i], route.x[i]);
@@ -302,14 +333,15 @@ MapboxMap {
         map.updateRoute();
         map.saveRoute();
         map.saveManeuvers();
+        if (!amend) app.setModeExploreRoute();
         app.navigationStarted = !!amend;
     }
 
     function centerOnPosition() {
         // Center on the current position.
         map.setCenter(
-            map.position.coordinate.longitude,
-            map.position.coordinate.latitude);
+                    map.position.coordinate.longitude,
+                    map.position.coordinate.latitude);
     }
 
     function clearRoute() {
@@ -329,8 +361,8 @@ MapboxMap {
         // Configure layer for selected POI markers.
         map.setPaintProperty(map.layers.poisSelected, "circle-opacity", 0);
         map.setPaintProperty(map.layers.poisSelected, "circle-radius", 16 / map.pixelRatio);
-        map.setPaintProperty(map.layers.poisSelected, "circle-stroke-color", app.styler.route);
-        map.setPaintProperty(map.layers.poisSelected, "circle-stroke-opacity", app.styler.routeOpacity);
+        map.setPaintProperty(map.layers.poisSelected, "circle-stroke-color", styler.route);
+        map.setPaintProperty(map.layers.poisSelected, "circle-stroke-opacity", styler.routeOpacity);
         map.setPaintProperty(map.layers.poisSelected, "circle-stroke-width", 13 / map.pixelRatio);
         // Configure layer for non-bookmarked POI markers.
         map.setLayoutProperty(map.layers.pois, "icon-allow-overlap", true);
@@ -341,8 +373,8 @@ MapboxMap {
         map.setLayoutProperty(map.layers.pois, "text-field", "{name}");
         map.setLayoutProperty(map.layers.pois, "text-optional", true);
         map.setLayoutProperty(map.layers.pois, "text-size", 12);
-        map.setPaintProperty(map.layers.pois, "text-color", app.styler.itemFg);
-        map.setPaintProperty(map.layers.pois, "text-halo-color", app.styler.itemBg);
+        map.setPaintProperty(map.layers.pois, "text-color", styler.itemFg);
+        map.setPaintProperty(map.layers.pois, "text-halo-color", styler.itemBg);
         map.setPaintProperty(map.layers.pois, "text-halo-width", 2);
         // Configure layer for bookmarked POI markers.
         map.setLayoutProperty(map.layers.poisBookmarked, "icon-allow-overlap", true);
@@ -353,28 +385,28 @@ MapboxMap {
         map.setLayoutProperty(map.layers.poisBookmarked, "text-field", "{name}");
         map.setLayoutProperty(map.layers.poisBookmarked, "text-optional", true);
         map.setLayoutProperty(map.layers.poisBookmarked, "text-size", 12);
-        map.setPaintProperty(map.layers.poisBookmarked, "text-color", app.styler.itemFg);
-        map.setPaintProperty(map.layers.poisBookmarked, "text-halo-color", app.styler.itemBg);
+        map.setPaintProperty(map.layers.poisBookmarked, "text-color", styler.itemFg);
+        map.setPaintProperty(map.layers.poisBookmarked, "text-halo-color", styler.itemBg);
         map.setPaintProperty(map.layers.poisBookmarked, "text-halo-width", 2);
         // Configure layer for route polyline.
         map.setLayoutProperty(map.layers.route, "line-cap", "round");
         map.setLayoutProperty(map.layers.route, "line-join", "round");
-        map.setPaintProperty(map.layers.route, "line-color", app.styler.route);
-        map.setPaintProperty(map.layers.route, "line-opacity", app.styler.routeOpacity);
+        map.setPaintProperty(map.layers.route, "line-color", styler.route);
+        map.setPaintProperty(map.layers.route, "line-opacity", styler.routeOpacity);
         map.setPaintProperty(map.layers.route, "line-width", 22 / map.pixelRatio);
         // Configure layer for active maneuver markers.
-        map.setPaintProperty(map.layers.maneuvers, "circle-color", app.styler.maneuver);
+        map.setPaintProperty(map.layers.maneuvers, "circle-color", styler.maneuver);
         map.setPaintProperty(map.layers.maneuvers, "circle-pitch-alignment", "map");
         map.setPaintProperty(map.layers.maneuvers, "circle-radius", 11 / map.pixelRatio);
-        map.setPaintProperty(map.layers.maneuvers, "circle-stroke-color", app.styler.route);
-        map.setPaintProperty(map.layers.maneuvers, "circle-stroke-opacity", app.styler.routeOpacity);
+        map.setPaintProperty(map.layers.maneuvers, "circle-stroke-color", styler.route);
+        map.setPaintProperty(map.layers.maneuvers, "circle-stroke-opacity", styler.routeOpacity);
         map.setPaintProperty(map.layers.maneuvers, "circle-stroke-width", 8 / map.pixelRatio);
         // Configure layer for passive maneuver markers.
-        map.setPaintProperty(map.layers.nodes, "circle-color", app.styler.maneuver);
+        map.setPaintProperty(map.layers.nodes, "circle-color", styler.maneuver);
         map.setPaintProperty(map.layers.nodes, "circle-pitch-alignment", "map");
         map.setPaintProperty(map.layers.nodes, "circle-radius", 5 / map.pixelRatio);
-        map.setPaintProperty(map.layers.nodes, "circle-stroke-color", app.styler.route);
-        map.setPaintProperty(map.layers.nodes, "circle-stroke-opacity", app.styler.routeOpacity);
+        map.setPaintProperty(map.layers.nodes, "circle-stroke-color", styler.route);
+        map.setPaintProperty(map.layers.nodes, "circle-stroke-opacity", styler.routeOpacity);
         map.setPaintProperty(map.layers.nodes, "circle-stroke-width", 8 / map.pixelRatio);
         // Configure layer for dummy symbols that knock out road shields etc.
         map.setLayoutProperty(map.layers.dummies, "icon-image", map.images.pixel);
@@ -412,7 +444,7 @@ MapboxMap {
 
     function initIcons() {
         var suffix = "";
-        if (app.styler.position) suffix = "-" + app.styler.position;
+        if (styler.position) suffix = "-" + styler.position;
         map.addImagePath(map.images.poi, Qt.resolvedUrl(app.getIconScaled("icons/marker/marker-stroked" + suffix, true)));
         map.addImagePath(map.images.poiBookmarked, Qt.resolvedUrl(app.getIconScaled("icons/marker/marker" + suffix, true)));
     }
@@ -424,15 +456,15 @@ MapboxMap {
         map.addLayer(map.layers.poisBookmarked, {"type": "symbol", "source": map.sources.poisBookmarked});
         map.addLayer(map.layers.route, {"type": "line", "source": map.sources.route}, map.firstLabelLayer);
         map.addLayer(map.layers.maneuvers, {
-            "type": "circle",
-            "source": map.sources.maneuvers,
-            "filter": ["==", "name", "active"],
-        }, map.firstLabelLayer);
+                         "type": "circle",
+                         "source": map.sources.maneuvers,
+                         "filter": ["==", "name", "active"],
+                     }, map.firstLabelLayer);
         map.addLayer(map.layers.nodes, {
-            "type": "circle",
-            "source": map.sources.maneuvers,
-            "filter": ["==", "name", "passive"],
-        }, map.firstLabelLayer);
+                         "type": "circle",
+                         "source": map.sources.maneuvers,
+                         "filter": ["==", "name", "passive"],
+                     }, map.firstLabelLayer);
         // Add transparent 1x1 pixels at maneuver points to knock out road shields etc.
         // that would otherwise overlap with the above maneuver and node circles.
         map.addImagePath(map.images.pixel, Qt.resolvedUrl("icons/pixel.png"));
@@ -509,11 +541,15 @@ MapboxMap {
         map.firstLabelLayer = py.evaluate("poor.app.basemap.first_label_layer");
         map.format = py.evaluate("poor.app.basemap.format");
         map.urlSuffix = py.evaluate("poor.app.basemap.url_suffix");
-        py.evaluate("poor.app.basemap.style_url") ?
-            (map.styleUrl  = py.evaluate("poor.app.basemap.style_url")) :
-            (map.styleJson = py.evaluate("poor.app.basemap.style_json"));
+        var processed = py.call_sync("poor.app.basemap.process_style", []);
+        if (processed) map.styleJson = processed;
+        else {
+            var url = py.evaluate("poor.app.basemap.style_url");
+            if (url) map.styleUrl  = url;
+            else map.styleJson = py.evaluate("poor.app.basemap.style_json");
+        }
         attributionButton.logo = py.evaluate("poor.app.basemap.logo");
-        app.styler.apply(py.evaluate("poor.app.basemap.style_gui"))
+        styler.apply(py.evaluate("poor.app.basemap.style_gui"))
         map.initIcons();
         map.initLayers();
         map.configureLayers();
@@ -527,7 +563,8 @@ MapboxMap {
     }
 
     function setMode() {
-        if (app.mode === modes.explore || app.mode === modes.exploreRoute) setModeExplore();
+        if (app.mode === modes.explore) setModeExplore();
+        else if (app.mode === modes.exploreRoute) setModeExploreRoute();
         else if (app.mode === modes.followMe) setModeFollowMe();
         else if (app.mode === modes.navigate) setModeNavigate();
         else console.log("Something is terribly wrong - unknown mode in Map.setMode: " + app.mode);
@@ -540,6 +577,18 @@ MapboxMap {
         map.autoRotate = false;
         if (map.zoomLevel > 14) map.setZoomLevel(14);
         map.setScale(app.conf.get("map_scale"));
+        py.call("poor.app.basemap.set_bias", [{'type': 'default', 'vehicle': ''}]);
+    }
+
+    function setModeExploreRoute() {
+        // map used to explore it
+        if (app.conf.mapZoomAutoWhenNavigating) map.autoZoom = false;
+        map.autoCenter = false;
+        map.autoRotate = false;
+        if (map.zoomLevel > 14) map.setZoomLevel(14);
+        map.setScale(app.conf.get("map_scale"));
+        py.call("poor.app.basemap.set_bias", [{'type': 'preview',
+                                                  'vehicle': route && route.mode ? route.mode : ''}]);
     }
 
     function setModeFollowMe() {
@@ -552,6 +601,7 @@ MapboxMap {
         map.autoCenter = true;
         map.autoRotate = app.conf.autoRotateWhenNavigating;
         if (app.conf.mapZoomAutoWhenNavigating) map.autoZoom = true;
+        py.call("poor.app.basemap.set_bias", [{'type': 'guidance', 'vehicle': route.mode}]);
     }
 
     function setModeNavigate() {
@@ -565,11 +615,12 @@ MapboxMap {
         map.autoRotate = app.conf.autoRotateWhenNavigating;
         if (app.conf.mapZoomAutoWhenNavigating) map.autoZoom = true;
         map.initVoiceNavigation();
+        py.call("poor.app.basemap.set_bias", [{'type': 'guidance', 'vehicle': route.mode}]);
     }
 
     function setScale(scale) {
         // Set the map scaling via its pixel ratio.
-        map.pixelRatio = app.styler.themePixelRatio * 1.5 * scale;
+        map.pixelRatio = styler.themePixelRatio * 1.5 * scale;
         map.configureLayers();
         positionMarker.configureLayers();
     }
@@ -626,7 +677,10 @@ MapboxMap {
 
     function updateRoute() {
         // Update route polyline on the map.
-        map.updateSourceLine(map.sources.route, map.route.coordinates);
+        if (map.route.coordinates)
+            map.updateSourceLine(map.sources.route, map.route.coordinates);
+        else
+            map.updateSourceLine(map.sources.route, []);
     }
 
 }

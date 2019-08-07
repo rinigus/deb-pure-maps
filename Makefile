@@ -1,7 +1,7 @@
 # -*- coding: us-ascii-unix -*-
 
 NAME       = pure-maps
-VERSION    = 1.20.0
+VERSION    = 1.22.0
 RELEASE    = $(NAME)-$(VERSION)
 DESTDIR    =
 PREFIX     = /usr
@@ -14,6 +14,7 @@ METADIR    = $(DESTDIR)$(PREFIX)/share/metainfo
 LANGS      = $(basename $(notdir $(wildcard po/*.po)))
 LCONVERT   = $(or $(wildcard /usr/lib/qt5/bin/lconvert),\
                   $(wildcard /bin/lconvert),\
+                  $(wildcard /usr/bin/lconvert),\
                   $(wildcard /usr/lib/*/qt5/bin/lconvert))
 
 define install-translation =
@@ -96,10 +97,14 @@ install:
 	@echo "Installing Python files..."
 	mkdir -p $(DATADIR)/poor
 	cp poor/*.py $(DATADIR)/poor
-	mkdir -p $(DATADIR)/poor/gpxpy
-	cp thirdparty/gpxpy/gpxpy/*.py $(DATADIR)/poor/gpxpy
+ifeq ($(INCLUDE_GPXPY),yes)
+	mkdir -p $(DATADIR)/thirdparty/gpxpy/gpxpy
+	cp thirdparty/gpxpy/gpxpy/*.py $(DATADIR)/thirdparty/gpxpy/gpxpy
+endif
 	mkdir -p $(DATADIR)/poor/openlocationcode
 	cp thirdparty/open-location-code/*.py $(DATADIR)/poor/openlocationcode
+	mkdir -p $(DATADIR)/poor/astral
+	cp thirdparty/astral/*.py $(DATADIR)/poor/astral
 	@echo "Installing QML files..."
 	mkdir -p $(DATADIR)/qml
 	cp qml/pure-maps.qml $(DATADIR)/qml/$(NAME).qml
@@ -108,6 +113,8 @@ install:
 	cp qml/icons/*.svg qml/icons/*.png qml/icons/*.jpg $(DATADIR)/qml/icons
 	mkdir -p $(DATADIR)/qml/icons/attribution
 	cp qml/icons/attribution/*.svg $(DATADIR)/qml/icons/attribution
+	mkdir -p $(DATADIR)/qml/icons/basemap
+	cp qml/icons/basemap/*.svg $(DATADIR)/qml/icons/basemap
 	mkdir -p $(DATADIR)/qml/icons/marker
 	cp qml/icons/marker/*.png $(DATADIR)/qml/icons/marker
 	mkdir -p $(DATADIR)/qml/icons/navigation
@@ -143,7 +150,7 @@ install:
 	cp routers/*.qml $(DATADIR)/routers
 	cp routers/README.md $(DATADIR)/routers
 	mkdir -p $(DATADIR)/routers/digitransit
-	cp routers/digitransit/*.png $(DATADIR)/routers/digitransit
+	cp routers/digitransit/*.svg $(DATADIR)/routers/digitransit
 	@echo "Installing fallback icons..."
 	mkdir -p $(DATADIR)/icons
 	cp -r qml/icons/fallback/*.svg $(DATADIR)/icons
@@ -155,6 +162,7 @@ install:
 	@echo "Installing executable file..."
 	mkdir -p $(EXEDIR)
 	cp data/$(NAME) $(EXE) || true
+	sed -i -e 's|INSTALL_PREFIX|$(PREFIX)|g' $(EXE) || true
 	@echo "Installing appdata file..."
 	mkdir -p $(METADIR)
 	cp packaging/pure-maps.appdata.xml $(METADIR)/$(NAME).appdata.xml || true

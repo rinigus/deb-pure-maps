@@ -10,6 +10,20 @@ keys are explained below, format-specific keys in following sections.
 
 * **`keys`**: List of API keys that are managed through
   `poor/keystore.py`. See HERE map layers for example of its use.
+  
+* **`lang`**: Optionally provide a language this map has been designed
+  for. Language is one of: local, en, fr, de, ru. Alternatively,
+  `lang` could be filled with a dictionary with the keys specifying a
+  language and the values specifying some style-specific strings that
+  will be used to replace `lang_key` in `tile_url` (raster tiles) or
+  in vector style description.
+  
+* **`lang_key`**: If the map style `lang` is given by dictionary,
+  specify which string is expected to be replaced in style or
+  `tile_url`. See HERE maps sources for example.
+  
+* **`light`**: whether the map corresponds to `day` or `night` light
+  scheme.
 
 * **`logo`**: Name of logo file found under `qml/icons/attribution` to
   display in a corner of the map. Optional, defaults to "default.svg".
@@ -20,11 +34,22 @@ keys are explained below, format-specific keys in following sections.
   appear. Currently supported profiles are "offline", "online" and
   "mixed". For profiles that use some online server to pull the tiles
   from, it is recommended to set this property to `["mixed", "online"]`.
+  
+* **`provider`**: Maps from the same provider can be grouped
+  together. For that, specify the same `provider` for all the maps.
 
 * **`style_gui`**: JSON object that can be used to alter GUI elements
  in agreement with the used map style. For example, see OSM Scout
  night styles. For the list of available keys and their meaning, see
  `qml/Styler.qml`.
+ 
+* **`type`**: maps under the same `provider` should specify their type
+  as one from the following list: default, terrain, satellite, hybrid,
+  preview, traffic, guidance. Traffic should be used if it is intended for
+  preview of the road and contains traffic information.
+  
+* **`vehicle`**: optionally provide a transportations mode that this
+  map has been designed for. Use on of: car, foot, bicycle, transit.
 
 Use `~/.local/share/harbour-pure-maps/maps` as a local installation
 directory in which to place your JSON file. Restart Pure Maps, and your

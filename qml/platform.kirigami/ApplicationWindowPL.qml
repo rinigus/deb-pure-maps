@@ -32,7 +32,9 @@ Kirigami.ApplicationWindow {
     width: 640
     visible: true
     pageStack.initialPage: initialPage
-    pageStack.globalToolBar.showNavigationButtons: pages && pages.currentIndex > 0
+    pageStack.globalToolBar.showNavigationButtons: pages && pages.currentIndex > 0 ?
+                                                       Kirigami.ApplicationHeaderStyle.ShowBackButton :
+                                                       Kirigami.ApplicationHeaderStyle.NoNavigationButtons
 
     property bool   isConvergent: true
     property var    initialPage
@@ -46,6 +48,13 @@ Kirigami.ApplicationWindow {
 
     // hide from Kirigami
     default property var _content
+
+    Settings {
+        property alias x: appWindow.x
+        property alias y: appWindow.y
+        property alias width: appWindow.width
+        property alias height: appWindow.height
+    }
 
     Component.onCompleted: {
         pages.ps = pageStack;
@@ -79,12 +88,4 @@ Kirigami.ApplicationWindow {
     function updateOrientation() {
         // blank - desktop is not expected to be changing screen orientation
     }
-
-    Settings {
-        property alias x: appWindow.x
-        property alias y: appWindow.y
-        property alias width: appWindow.width
-        property alias height: appWindow.height
-    }
-
 }

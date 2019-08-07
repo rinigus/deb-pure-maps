@@ -23,7 +23,7 @@ MapButton {
     id: button
     anchors.bottom: parent.bottom
     anchors.horizontalCenter: parent.horizontalCenter
-    iconHeight: app.styler.themeIconSizeSmall
+    iconHeight: styler.themeIconSizeSmall
     iconSource: app.getIcon("icons/menu")
     states: State {
         when: hidden
@@ -40,5 +40,5 @@ MapButton {
     z: 900
     onClicked: app.showMenu();
 
-    property bool hidden: app.infoPanelOpen || (map.cleanMode && !app.conf.mapModeCleanShowMenuButton)
+    property bool hidden: app.modalDialog || app.infoPanelOpen || (map.cleanMode && !app.conf.mapModeCleanShowMenuButton)
 }

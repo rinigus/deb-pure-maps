@@ -5,7 +5,7 @@
 %define __provides_exclude_from ^%{_datadir}/.*$
 
 Name: harbour-pure-maps
-Version: 1.20.0
+Version: 1.22.0
 Release: 1
 Summary: Maps and navigation
 License: GPLv3+
@@ -17,7 +17,7 @@ BuildRequires: make
 BuildRequires: qt5-qttools-linguist
 Requires: libkeepalive
 Requires: libsailfishapp-launcher
-Requires: mapboxgl-qml >= 1.3.1
+Requires: mapboxgl-qml >= 1.5.0.2
 Requires: pyotherside-qml-plugin-python3-qt5 >= 1.5.1
 Requires: qt5-qtdeclarative-import-multimedia >= 5.2
 Requires: qt5-qtdeclarative-import-positioning >= 5.2
@@ -31,7 +31,7 @@ search for nearby places by type and share your location.
 %setup -q
 
 %install
-make DESTDIR=%{buildroot} PREFIX=/usr install
+make DESTDIR=%{buildroot} PREFIX=/usr INCLUDE_GPXPY=yes install
 
 %files
 %defattr(-,root,root,-)

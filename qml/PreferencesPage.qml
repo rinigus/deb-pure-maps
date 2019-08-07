@@ -34,62 +34,224 @@ PagePL {
             ExpandingSectionPL {
                 id: sectionGeneral
                 title: app.tr("General")
-                content.sourceComponent: FormLayoutPL {
-                    spacing: app.styler.themePaddingMedium
-                    width: sectionGeneral.width
+                content.sourceComponent: Column {
+                    spacing: styler.themePaddingMedium
+                    width: sectionControls.width
+                    FormLayoutPL {
+                        spacing: styler.themePaddingMedium
+                        width: sectionGeneral.width
 
-                    ComboBoxPL {
-                        id: unitsComboBox
-                        label: app.tr("Units")
-                        model: [ app.tr("Metric"), app.tr("American"), app.tr("British") ]
-                        property var values: ["metric", "american", "british"]
-                        Component.onCompleted: {
-                            var value = app.conf.units;
-                            unitsComboBox.currentIndex = unitsComboBox.values.indexOf(value);
+                        ComboBoxPL {
+                            id: unitsComboBox
+                            label: app.tr("Units")
+                            model: [ app.tr("Metric"), app.tr("American"), app.tr("British") ]
+                            property var values: ["metric", "american", "british"]
+                            Component.onCompleted: {
+                                var value = app.conf.units;
+                                unitsComboBox.currentIndex = unitsComboBox.values.indexOf(value);
+                            }
+                            onCurrentIndexChanged: {
+                                var index = unitsComboBox.currentIndex;
+                                app.conf.set("units", unitsComboBox.values[index]);
+                            }
                         }
-                        onCurrentIndexChanged: {
-                            var index = unitsComboBox.currentIndex;
-                            app.conf.set("units", unitsComboBox.values[index]);
-                        }
-                    }
 
-                    ComboBoxPL {
-                        id: sleepComboBox
-                        description: app.tr("Only applies when Pure Maps is active. When minimized, sleep is controlled by normal device-level preferences.")
-                        label: app.tr("Prevent sleep")
-                        model: [ app.tr("Never"), app.tr("When navigating"), app.tr("Always") ]
-                        property var values: ["never", "navigating", "always"]
-                        Component.onCompleted: {
-                            var value = app.conf.get("keep_alive");
-                            sleepComboBox.currentIndex = sleepComboBox.values.indexOf(value);
-                        }
-                        onCurrentIndexChanged: {
-                            var index = sleepComboBox.currentIndex;
-                            app.conf.set("keep_alive", sleepComboBox.values[index]);
-                        }
-                    }
+                        ComboBoxPL {
+                            description: app.tr("Preferred map language.")
+                            label: app.tr("Language")
+                            model: [
+                                app.tr("Local"),
+                                app.tr("Arabic"),
+                                app.tr("Basque"),
+                                app.tr("Catalan"),
+                                app.tr("Chinese (simplified)"),
+                                app.tr("Chinese (traditional)"),
+                                app.tr("Czech"),
+                                app.tr("Danish"),
+                                app.tr("Dutch"),
+                                app.tr("English"),
+                                app.tr("Finnish"),
+                                app.tr("French"),
+                                app.tr("German"),
+                                app.tr("Gaelic"),
+                                app.tr("Greek"),
+                                app.tr("Hebrew"),
+                                app.tr("Hindi"),
+                                app.tr("Indonesian"),
+                                app.tr("Italian"),
+                                app.tr("Japanese"),
+                                app.tr("Korean"),
+                                app.tr("Norwegian"),
+                                app.tr("Persian"),
+                                app.tr("Polish"),
+                                app.tr("Portuguese"),
+                                app.tr("Russian"),
+                                app.tr("Sinhalese"),
+                                app.tr("Spanish"),
+                                app.tr("Swedish"),
+                                app.tr("Thai"),
+                                app.tr("Turkish"),
+                                app.tr("Ukrainian"),
+                                app.tr("Urdu"),
+                                app.tr("Vietnamese"),
+                                app.tr("Welsh")
+                            ]
+                            property var values: [
+                                "local",
+                                "ar",
+                                "eu",
+                                "ca",
+                                "zh-simpl",
+                                "zh",
+                                "cs",
+                                "da",
+                                "nl",
+                                "en",
+                                "fi",
+                                "fr",
+                                "de",
+                                "ga",
+                                "el",
+                                "he",
+                                "hi",
+                                "id",
+                                "it",
+                                "ja",
+                                "ko",
+                                "no",
+                                "fa",
+                                "pl",
+                                "pt",
+                                "ru",
+                                "si",
+                                "es",
+                                "sv",
+                                "th",
+                                "tr",
+                                "uk",
+                                "ur",
+                                "vi",
+                                "cy"
+                            ]
 
-                    TextSwitchPL {
-                        id: autocompleteSwitch
-                        checked: app.conf.autoCompleteGeo
-                        description: app.tr("Fetch autocompleted search results while typing a search string.")
-                        text: app.tr("Autocomplete while searching")
-                        onCheckedChanged: app.conf.set("auto_complete_geo", autocompleteSwitch.checked)
+                            Component.onCompleted: {
+                                var value = app.conf.basemapLang;
+                                currentIndex = values.indexOf(value);
+                            }
+                            onCurrentIndexChanged: {
+                                var index = currentIndex;
+                                app.conf.set("basemap_lang", values[index]);
+                                py.call_sync("poor.app.basemap.update", []);
+                            }
+                        }
+
+                        ComboBoxPL {
+                            description: app.tr("Switching between day/night modes of the map. " +
+                                                "Note that not all providers have all maps with day/night " +
+                                                "pairs available.")
+                            label: app.tr("Day/night mode")
+                            model: [
+                                app.tr("Manual"),
+                                app.tr("Sunrise and sunset")
+                            ]
+                            property var values: [
+                                "none",
+                                "sunrise/sunset"
+                            ]
+                            Component.onCompleted: {
+                                var value = app.conf.basemapAutoLight;
+                                currentIndex = values.indexOf(value);
+                            }
+                            onCurrentIndexChanged: {
+                                var index = currentIndex;
+                                app.conf.set("basemap_auto_light", values[index]);
+                            }
+                        }
+
+                        TextSwitchPL {
+                            checked: app.conf.basemapAutoMode
+                            description: app.tr("Automatically switch between map types of the provider according to the current task. " +
+                                                "For example, show map designed for navigation while routing.")
+                            text: app.tr("Switch map modes")
+                            onCheckedChanged: {
+                                app.conf.set("basemap_auto_mode", checked);
+                                py.call_sync("poor.app.basemap.update", []);
+                            }
+                        }
+
+                        ComboBoxPL {
+                            id: sleepComboBox
+                            description: app.tr("Only applies when Pure Maps is active. When minimized, sleep is controlled by normal device-level preferences.")
+                            label: app.tr("Prevent sleep")
+                            model: [ app.tr("Never"), app.tr("When navigating"), app.tr("Always") ]
+                            property var values: ["never", "navigating", "always"]
+                            Component.onCompleted: {
+                                var value = app.conf.get("keep_alive");
+                                sleepComboBox.currentIndex = sleepComboBox.values.indexOf(value);
+                            }
+                            onCurrentIndexChanged: {
+                                var index = sleepComboBox.currentIndex;
+                                app.conf.set("keep_alive", sleepComboBox.values[index]);
+                            }
+                        }
+
+                        TextSwitchPL {
+                            id: autocompleteSwitch
+                            checked: app.conf.autoCompleteGeo
+                            description: app.tr("Fetch autocompleted search results while typing a search string.")
+                            text: app.tr("Autocomplete while searching")
+                            onCheckedChanged: app.conf.set("auto_complete_geo", checked)
+                        }
                     }
 
                     Spacer {
-                        height: app.styler.themePaddingLarge
+                        height: styler.themePaddingLarge
+                    }
+
+                    ListItemLabel {
+                        text: app.tr("Clear all history, including search, routes, and destinations. " +
+                                     "Please note that the bookmarks will be kept.")
+                        truncMode: truncModes.none
+                        wrapMode: Text.WordWrap
+                    }
+
+                    ListItemLabel {
+                        id: historyClearedNote
+                        text: app.tr("History cleared")
+                        truncMode: truncModes.none
+                        visible: false
+                        wrapMode: Text.WordWrap
                     }
 
                     ButtonPL {
                         anchors.horizontalCenter: parent.horizontalCenter
-                        preferredWidth: app.styler.themeButtonWidthLarge
+                        preferredWidth: styler.themeButtonWidthLarge
+                        text: app.tr("Clear history")
+                        onClicked: {
+                            py.call_sync("poor.app.history.clear", []);
+                            historyClearedNote.visible = true;
+                        }
+                    }
+
+                    Spacer {
+                        height: styler.themePaddingLarge
+                    }
+
+                    ListItemLabel {
+                        text: app.tr("Clear map tiles stored in a cache")
+                        truncMode: truncModes.none
+                        wrapMode: Text.WordWrap
+                    }
+
+                    ButtonPL {
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        preferredWidth: styler.themeButtonWidthLarge
                         text: app.tr("Clear cache")
                         onClicked: map.clearCache();
                     }
 
                     Spacer {
-                        height: app.styler.themePaddingLarge
+                        height: styler.themePaddingLarge
                     }
                 }
             }
@@ -98,7 +260,7 @@ PagePL {
                 id: sectionKeys
                 title: app.tr("API keys")
                 content.sourceComponent: Column {
-                    spacing: app.styler.themePaddingMedium
+                    spacing: styler.themePaddingMedium
                     width: sectionKeys.width
 
                     ListItemLabel {
@@ -116,7 +278,7 @@ PagePL {
                     }
 
                     FormLayoutPL {
-                        spacing: app.styler.themePaddingMedium
+                        spacing: styler.themePaddingMedium
                         width: parent.width
                         Repeater {
                             delegate: TextFieldPL {
@@ -145,16 +307,16 @@ PagePL {
                     }
 
                     Spacer {
-                        height: app.styler.themePaddingLarge
+                        height: styler.themePaddingLarge
                     }
                 }
             }
 
             ExpandingSectionPL {
                 id: sectionExplore
-                title: app.tr("Map view")
+                title: app.tr("Exploring")
                 content.sourceComponent: FormLayoutPL {
-                    spacing: app.styler.themePaddingMedium
+                    spacing: styler.themePaddingMedium
                     width: sectionExplore.width
 
                     ComboBoxPL {
@@ -174,23 +336,8 @@ PagePL {
                         }
                     }
 
-                    SliderPL {
-                        id: scaleSlider
-                        label: app.tr("Map scale")
-                        maximumValue: 2.0
-                        minimumValue: 0.5
-                        stepSize: 0.1
-                        value: app.conf.get("map_scale")
-                        valueText: value
-                        width: parent.width
-                        onValueChanged: {
-                            app.conf.set("map_scale", scaleSlider.value);
-                            app.mode !== modes.navigate && map.setScale(scaleSlider.value);
-                        }
-                    }
-
                     Spacer {
-                        height: app.styler.themePaddingLarge
+                        height: styler.themePaddingLarge
                     }
                 }
             }
@@ -199,7 +346,7 @@ PagePL {
                 id: sectionAutoZoom
                 title: app.tr("Automatic zoom")
                 content.sourceComponent: FormLayoutPL {
-                    spacing: app.styler.themePaddingMedium
+                    spacing: styler.themePaddingMedium
                     width: sectionAutoZoom.width
 
                     SliderPL {
@@ -230,7 +377,7 @@ PagePL {
                     }
 
                     Spacer {
-                        height: app.styler.themePaddingLarge
+                        height: styler.themePaddingLarge
                     }
                 }
             }
@@ -239,7 +386,7 @@ PagePL {
                 id: sectionControls
                 title: app.tr("Controls")
                 content.sourceComponent: Column {
-                    spacing: app.styler.themePaddingMedium
+                    spacing: styler.themePaddingMedium
                     width: sectionControls.width
 
                     ListItemLabel {
@@ -317,6 +464,15 @@ PagePL {
                     }
 
                     TextSwitchPL {
+                        checked: app.conf.mapModeCleanShowBasemap
+                        text: app.tr("Map selection")
+                        onCheckedChanged: {
+                            if (app.conf.mapModeCleanShowBasemap!==checked)
+                                app.conf.set("map_mode_clean_show_basemap", checked);
+                        }
+                    }
+
+                    TextSwitchPL {
                         checked: app.conf.mapModeCleanShowMeters
                         text: app.tr("Speed and location precision")
                         onCheckedChanged: {
@@ -353,7 +509,7 @@ PagePL {
                     }
 
                     Spacer {
-                        height: app.styler.themePaddingLarge
+                        height: styler.themePaddingLarge
                     }
                 }
             }
@@ -362,7 +518,7 @@ PagePL {
                 id: sectionNavigate
                 title: app.tr("Navigation")
                 content.sourceComponent: Column {
-                    spacing: app.styler.themePaddingMedium
+                    spacing: styler.themePaddingMedium
                     width: sectionNavigate.width
 
                     TextSwitchPL {
@@ -448,7 +604,7 @@ PagePL {
                     }
 
                     FormLayoutPL {
-                        spacing: app.styler.themePaddingMedium
+                        spacing: styler.themePaddingMedium
                         width: parent.width
                         ComboBoxPL {
                             id: voiceGenderComboBox
@@ -487,7 +643,7 @@ PagePL {
                     }
 
                     Spacer {
-                        height: app.styler.themePaddingLarge
+                        height: styler.themePaddingLarge
                     }
                 }
             }
@@ -497,7 +653,7 @@ PagePL {
                 title: app.tr("Testing")
                 content.sourceComponent: Column {
                     id: testingColumn
-                    spacing: app.styler.themePaddingMedium
+                    spacing: styler.themePaddingMedium
                     width: sectionTesting.width
 
                     property string message
@@ -511,7 +667,7 @@ PagePL {
                     }
 
                     FormLayoutPL {
-                        spacing: app.styler.themePaddingMedium
+                        spacing: styler.themePaddingMedium
                         width: parent.width
                         ComboBoxPL {
                             id: languageComboBox
@@ -557,18 +713,18 @@ PagePL {
                     }
 
                     Spacer {
-                        height: app.styler.themePaddingLarge
+                        height: styler.themePaddingLarge
                     }
 
                     ButtonPL {
                         anchors.horizontalCenter: parent.horizontalCenter
-                        preferredWidth: app.styler.themeButtonWidthLarge
+                        preferredWidth: styler.themeButtonWidthLarge
                         text: app.tr("Test")
                         onClicked: testingColumn.test()
                     }
 
                     Spacer {
-                        height: app.styler.themePaddingLarge
+                        height: styler.themePaddingLarge
                     }
 
                     ListItemLabel {
@@ -578,7 +734,7 @@ PagePL {
                     }
 
                     Spacer {
-                        height: app.styler.themePaddingLarge
+                        height: styler.themePaddingLarge
                     }
 
                     Timer {
@@ -625,7 +781,7 @@ PagePL {
                 id: sectionDevelop
                 title: app.tr("Development")
                 content.sourceComponent: Column {
-                    spacing: app.styler.themePaddingMedium
+                    spacing: styler.themePaddingMedium
                     width: sectionDevelop.width
 
                     ListItemLabel {
@@ -650,7 +806,7 @@ PagePL {
                     }
 
                     Spacer {
-                        height: app.styler.themePaddingLarge
+                        height: styler.themePaddingLarge
                     }
                 }
             }

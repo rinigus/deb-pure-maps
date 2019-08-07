@@ -21,7 +21,7 @@ import collections
 import contextlib
 import functools
 import glob
-import poor.gpxpy.parser
+import gpxpy.parser
 import json
 import locale
 import math
@@ -187,6 +187,7 @@ def format_distance_american(feet, n=2, short=True):
     if (n > 1 and feet >= 1000) or feet >= 5280:
         distance = feet / 5280
         ndigits = n - get_ndigits(distance)
+        ndigits = max(0, ndigits)
         distance = round(distance, ndigits)
         distance = "{{:.{:d}f}}".format(max(0, ndigits)).format(distance)
         units = _("mi") if short else _("miles")
@@ -205,6 +206,7 @@ def format_distance_british(yards, n=2, short=True):
     if (n > 1 and yards >= 400) or yards >= 1760:
         distance = yards / 1760
         ndigits = n - get_ndigits(distance)
+        ndigits = max(0, ndigits)
         distance = round(distance, ndigits)
         distance = "{{:.{:d}f}}".format(max(0, ndigits)).format(distance)
         units = _("mi") if short else _("miles")
@@ -223,6 +225,7 @@ def format_distance_metric(meters, n=2, short=True):
     if meters >= 1000:
         distance = meters / 1000
         ndigits = n - get_ndigits(distance)
+        ndigits = max(0, ndigits)
         distance = round(distance, ndigits)
         distance = "{{:.{:d}f}}".format(max(0, ndigits)).format(distance)
         units = _("km") if short else _("kilometers")
@@ -457,7 +460,7 @@ def read_gpx(path):
     """Read and join tracks from GPX file at `path`."""
     try:
         with open(path, "r", encoding="utf_8") as f:
-            gpx = poor.gpxpy.parser.GPXParser(f).parse()
+            gpx = gpxpy.parser.GPXParser(f).parse()
             x, y = [], []
             # prefer route to recorded track if the both are available
             for route in gpx.routes:

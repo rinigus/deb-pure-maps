@@ -23,7 +23,7 @@ MapButton {
     id: button
     anchors.bottom: parent.bottom
     anchors.left: menuButton.right
-    iconHeight: app.styler.themeIconSizeSmall
+    iconHeight: styler.themeIconSizeSmall
     iconSource: app.getIcon("icons/route")
     states: [
         State {
@@ -41,7 +41,7 @@ MapButton {
     visible: app.mode === modes.explore || app.mode === modes.exploreRoute
     z: 500
 
-    property bool hidden: app.infoPanelOpen || (map.cleanMode && !app.conf.mapModeCleanShowNavigate)
+    property bool hidden: app.modalDialog || app.infoPanelOpen || (map.cleanMode && !app.conf.mapModeCleanShowNavigate)
 
     onClicked: app.pushMain(Qt.resolvedUrl("RoutePage.qml"))
 }

@@ -26,11 +26,13 @@ Item {
     height: childrenRect.height
     width: parent.width
 
+    property alias acceptableInput: entry.acceptableInput
     property alias description: desc.text
     property alias inputMethodHints: entry.inputMethodHints
     property alias label: entry.label
     property alias placeholderText: entry.placeholderText
     property alias text: entry.text
+    property alias validator: entry.validator
 
     signal enter
 
@@ -46,10 +48,10 @@ Item {
     IconButtonPL {
         id: clearButton
         anchors.right: parent.right
-        anchors.rightMargin: visible ? app.styler.themePaddingMedium : 0
+        anchors.rightMargin: visible ? styler.themePaddingMedium : 0
         anchors.verticalCenter: entry.verticalCenter
-        iconName: app.styler.iconEditClear
-        iconHeight: app.styler.themeFontSizeMedium
+        iconName: styler.iconEditClear
+        iconHeight: styler.themeFontSizeMedium
         visible: entry.text && entry.activeFocus
         onClicked: entry.text = ""
     }
@@ -57,12 +59,12 @@ Item {
     Label {
         id: desc
         anchors.left: entry.left
-        anchors.leftMargin: app.styler.themeHorizontalPageMargin
+        anchors.leftMargin: styler.themeHorizontalPageMargin
         anchors.right: parent.right
-        anchors.rightMargin: app.styler.themeHorizontalPageMargin
+        anchors.rightMargin: styler.themeHorizontalPageMargin
         anchors.top: entry.bottom
-        anchors.topMargin: text ? app.styler.themePaddingSmall : 0
-        font.pixelSize: app.styler.themeFontSizeSmall
+        anchors.topMargin: text ? styler.themePaddingSmall : 0
+        font.pixelSize: styler.themeFontSizeSmall
         height: text ? implicitHeight : 0
         visible: text
         wrapMode: Text.WordWrap

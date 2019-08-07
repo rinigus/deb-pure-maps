@@ -28,20 +28,19 @@ PageListPL {
 
     delegate: ListItemPL {
         id: listItem
-        contentHeight: app.styler.themeItemSizeSmall
+        contentHeight: styler.themeItemSizeSmall
 
         ListItemLabel {
             id: nameLabel
             color: (model.active || listItem.highlighted) ?
-                       app.styler.themeHighlightColor : app.styler.themePrimaryColor;
-            height: app.styler.themeItemSizeSmall
+                       styler.themeHighlightColor : styler.themePrimaryColor;
+            height: styler.themeItemSizeSmall
             text: model.name
         }
 
         onClicked: {
             app.hideMenu(app.tr("Map: %1").arg(model.name));
             py.call_sync("poor.app.set_basemap", [model.pid]);
-            //map.setBasemap();
             for (var i = 0; i < page.model.count; i++)
                 page.model.setProperty(i, "active", false);
             model.active = true;
@@ -52,7 +51,7 @@ PageListPL {
 
     Component.onCompleted: {
         // Load basemap model items from the Python backend.
-        py.call("poor.util.get_basemaps", [], function(basemaps) {
+        py.call("poor.app.basemap.list", [], function(basemaps) {
             Util.markDefault(basemaps, app.conf.getDefault("basemap"));
             Util.appendAll(page.model, basemaps);
         });

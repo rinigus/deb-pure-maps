@@ -37,7 +37,7 @@ Page {
     SilicaFlickable {
         id: flickable
         anchors.fill: parent
-        contentHeight: title.height + 2 * app.styler.themePaddingLarge + itemCont.height
+        contentHeight: title.height + 2 * styler.themePaddingLarge + itemCont.height
 
         PageHeader {
             id: title
@@ -49,7 +49,7 @@ Page {
             id: itemCont
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.top: title.bottom
-            anchors.topMargin: app.styler.themePaddingLarge
+            anchors.topMargin: styler.themePaddingLarge
             height: childrenRect.height
             width: parent.width
         }
@@ -67,5 +67,9 @@ Page {
         if (page.status === PageStatus.Activating) pageStatusActivating();
         else if (page.status === PageStatus.Active) pageStatusActive();
         else if (page.status === PageStatus.Inactive) pageStatusInactive()
+    }
+
+    function scrollToTop() {
+        flickable.scrollToTop();
     }
 }

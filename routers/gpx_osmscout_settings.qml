@@ -21,9 +21,10 @@ import "../qml/platform"
 
 FormLayoutPL {
     id: settingsBlock
-    spacing: app.styler.themePaddingLarge
+    spacing: styler.themePaddingLarge
     width: parent.width
 
+    property bool full: true // ignored for this router
     property string selectedFile
 
     ValueButtonPL {

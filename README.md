@@ -10,6 +10,25 @@ Maps is a fork of [WhoGo Maps](https://github.com/otsaloma/whogo-maps)
 that was made to continue its development.
 
 
+## User feedback
+
+There are two main communication channels with the users: GitHub and a
+thread at
+[TMO](https://talk.maemo.org/showthread.php?t=100442). 
+
+Please use Github issues to address specific problems and development
+requests. General discussion is expected either through corresponding
+issues opened by maintainer or TMO thread. Please note that users from
+all platforms are welcome at TMO, not only current Sailfish OS users.
+
+
+## Development
+
+For development of Pure Maps and testing on desktop, you would have to
+choose platform for which you develop, install dependencies, and be
+able to run application. All this is covered below.
+
+
 ## Platforms
 
 To support multiple platforms, QML code is split into
@@ -52,11 +71,55 @@ are needed:
 * PyXDG https://www.freedesktop.org/wiki/Software/pyxdg/
 * Mapbox GL Native, Qt version, use the packaged version at https://github.com/rinigus/pkg-mapbox-gl-native
 * Mapbox GL QML, unofficial QML bindings, https://github.com/rinigus/mapbox-gl-qml
-* [flatpak only] QML runner https://github.com/rinigus/qmlrunner
+* [non-Sailfish] QML runner https://github.com/rinigus/qmlrunner
+* GPXPy, https://github.com/tkrajina/gpxpy
 
 When developing with Kirigami using flatpak builder, dependencies will
 be pulled and installed in flatpak. See instructions regarding
 Kirigami below.
+
+GPXPy is also provided as a thirdparty submodule and can be installed
+together with Pure Maps by setting `INCLUDE_GPXPY=yes` argument to
+`make install`. 
+
+
+## Running
+
+For development purposes, Pure Maps doesn't need to be installed in
+the system and can be started wither using `qmlscene`, `qmlrunner`, or
+some similar tool. On Linux desktop, `qmlrunner` is recommended since
+it adds support for fallback icons.
+
+The both solutions require the path used to install QML
+dependencies. In the following examples, `/usr/local/lib64/qml`,
+please adjust if needed.
+
+To run Pure Maps from the folder containing source, make a symbolic
+links
+
+```
+ln -s qml/icons/fallback icons
+ln -s ../thirdparty/open-location-code poor/openlocationcode
+```
+
+and then run with
+
+```
+qmlrunner -P .. -path /usr/local/lib64/qml pure-maps
+```
+
+or
+
+```
+qmlscene -I /usr/local/lib64/qml qml/pure-maps.qml
+```
+
+Note that you will need API keys if you wish to access the services
+that require them (such as Mapbox). For that, register as a developer
+and insert these keys in the preferences. Among services that don't
+require API keys are OSM Scout Server (for offline maps), HSL (raster
+tiles for Finland), Sputnik (raster tiles in Russian), Photon
+(search).
 
 
 ## Packaging
@@ -73,18 +136,6 @@ command `make rpm`. You don't need an SDK to build the RPM, only basic
 tools: `make`, `rpmbuild`, `gettext` and `qttools`.
 
 Flatpak specific instructions are available under `packaging/flatpak`.
-
-
-## User feedback
-
-There are two main communication channels with the users: Github and a
-thread at
-[TMO](https://talk.maemo.org/showthread.php?t=100442). 
-
-Please use Github issues to address specific problems and development
-requests. General discussion is expected either through corresponding
-issues opened by maintainer or TMO thread. Please note that users from
-all platforms are welcome at TMO, not only current Sailfish OS users.
 
 
 ## Platform specific notes
@@ -119,6 +170,18 @@ signals, functions), are ordered alphabetically.
 
 Its possible that some of the implemented code does not fully comply
 with the outlined order. Then it should be fixed eventually.
+
+If you wish to run the code while developing, it is recommended to
+make a symbolic link (command run from Pure Maps source folder):
+
+```
+ln -s ../thirdparty/open-location-code poor/openlocationcode
+```
+
+If GPXPy is not installed in the system, but is pulled as a thirdparty
+module, Pure Maps will run when executed using `qmlscene`, `qmlrunner`
+or similar tool, but the automatic tests will fail. This is an expected
+behavior or the implementation.
 
 ### QML
 

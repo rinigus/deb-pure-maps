@@ -23,6 +23,7 @@ Dialog {
     id: page
     allowedOrientations: app.defaultAllowedOrientations
 
+    property bool   acceptDestinationPop: false
     property string acceptIconName // for compatibility
     property string acceptText
     default property alias content: itemCont.data
@@ -35,7 +36,7 @@ Dialog {
     SilicaFlickable {
         id: flickable
         anchors.fill: parent
-        contentHeight: title.height + 2 * app.styler.themePaddingLarge + itemCont.height
+        contentHeight: title.height + 2 * styler.themePaddingLarge + itemCont.height
 
         DialogHeader {
             id: title
@@ -49,7 +50,7 @@ Dialog {
             id: itemCont
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.top: title.bottom
-            anchors.topMargin: app.styler.themePaddingLarge
+            anchors.topMargin: styler.themePaddingLarge
             height: childrenRect.height
             width: parent.width
         }
@@ -62,4 +63,6 @@ Dialog {
         else if (page.status === PageStatus.Active) pageStatusActive();
         else if (page.status === PageStatus.Inactive) pageStatusInactive()
     }
+
+    Component.onCompleted: if (acceptDestinationPop) acceptDestinationAction = PageStackAction.Pop
 }

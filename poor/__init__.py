@@ -17,7 +17,7 @@
 
 """An application to display maps and stuff."""
 
-__version__ = "1.20.0"
+__version__ = "1.22.0"
 
 try:
     import pyotherside
@@ -44,13 +44,14 @@ from poor import storage
 from poor.attrdict import AttrDict
 from poor.config import ConfigurationStore
 conf = ConfigurationStore()
-from poor.map import Map
+from poor.map import Map, MapManager
 from poor.geocoder import Geocoder
 from poor.guide import Guide
 from poor.history import HistoryManager
 from poor.keystore import KeyStore
 key = KeyStore()
 from poor.router import Router
+from poor.sun import Sun
 from poor.voice import VoiceGenerator
 from poor.narrative import Narrative
 from poor.application import Application
@@ -70,10 +71,12 @@ assert i18n
 assert KeyStore
 assert LOCALE_DIR
 assert Map
+assert MapManager
 assert Narrative
 assert polysimp
 assert Router
 assert storage
+assert Sun
 assert util
 assert VoiceGenerator
 

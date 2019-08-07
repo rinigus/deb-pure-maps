@@ -29,12 +29,12 @@ Kirigami.ScrollablePage {
     Kirigami.ColumnView.fillWidth: false
     Kirigami.Theme.colorSet: Kirigami.Theme.Window
 
-    property string acceptIconName: app.styler.iconForward
+    property string acceptIconName: styler.iconForward
     property alias  acceptText: mainAction.text
     property var    acceptCallback
     property bool   active: page.isCurrentPage
     property bool   canNavigateForward: true
-    property alias  currentIndex: listView.currentIndex
+    property int    currentIndex: listView.currentIndex
     property bool   currentPage: app.pages.currentItem === page
     property alias  delegate: listView.delegate
     // has to be Component, so wrap it as Component { Item {} }
@@ -71,13 +71,14 @@ Kirigami.ScrollablePage {
     ListView {
         id: listView
 
+        currentIndex: -1
         header: Column {
-            height: app.styler.themePaddingLarge +
-                    (headerExtraLoader.height > 0 ? headerExtraLoader.height + app.styler.themePaddingLarge : 0)
+            height: styler.themePaddingLarge +
+                    (headerExtraLoader.height > 0 ? headerExtraLoader.height + styler.themePaddingLarge : 0)
             width: listView.width
 
             Item {
-                height: app.styler.themePaddingLarge
+                height: styler.themePaddingLarge
                 width: parent.width
             }
 
@@ -98,6 +99,20 @@ Kirigami.ScrollablePage {
             width: placeholderEnabled ? listView.width : 0
             wrapMode: Text.WordWrap
         }
+
+        onCurrentIndexChanged: {
+            if (page.currentIndex !== listView.currentIndex)
+               page.currentIndex = listView.currentIndex;
+        }
+    }
+
+    onCurrentIndexChanged: {
+        // callLater is used to ensure that all property handlers by
+        // listView, such as creation of delegates, are finished
+        // before application of new currentIndex
+        Qt.callLater(function (){
+            listView.currentIndex = page.currentIndex;
+        });
     }
 
     onCurrentPageChanged: {

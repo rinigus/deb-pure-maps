@@ -25,7 +25,8 @@ Rectangle {
     y: app.screenHeight - (height - radius)
     color: navigationInfoBlock.color
     height: navigationInfoBlock.shieldLeftHeight > 0 ? navigationInfoBlock.shieldLeftHeight + radius : 0
-    radius: app.styler.themePaddingLarge
+    radius: styler.themePaddingLarge
+    visible: !app.modalDialog
     width: navigationInfoBlock.shieldLeftWidth > 0 ? navigationInfoBlock.shieldLeftWidth + radius : 0
     z: 400
 

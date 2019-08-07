@@ -24,7 +24,7 @@ PagePL {
     id: page
     title: app.tr("Navigation")
 
-    acceptIconName: app.styler.iconManeuvers
+    acceptIconName: styler.iconManeuvers
     acceptText: app.tr("Maneuvers")
 
     Column {
@@ -36,14 +36,14 @@ PagePL {
             height: Math.max(beginItem.height, rerouteItem.height, clearItem.height)
             width: parent.width
 
-            property real contentWidth: width - 2 * app.styler.themeHorizontalPageMargin
+            property real contentWidth: width - 2 * styler.themeHorizontalPageMargin
             property real itemWidth: contentWidth / 3
 
             ToolItemPL {
                 id: beginItem
-                width: row.itemWidth + app.styler.themeHorizontalPageMargin
-                icon.iconHeight: app.styler.themeIconSizeMedium
-                icon.iconName: app.mode === modes.navigate ? app.styler.iconPause : app.styler.iconStart
+                width: row.itemWidth + styler.themeHorizontalPageMargin
+                icon.iconHeight: styler.themeIconSizeMedium
+                icon.iconName: app.mode === modes.navigate ? styler.iconPause : styler.iconStart
                 text: app.mode === modes.navigate ? app.tr("Pause") :
                                                     (app.navigationStarted ? app.tr("Resume") : app.tr("Begin"))
                 onClicked: {
@@ -56,8 +56,8 @@ PagePL {
             ToolItemPL {
                 id: rerouteItem
                 width: row.itemWidth
-                icon.iconHeight: app.styler.themeIconSizeMedium
-                icon.iconName: app.styler.iconRefresh
+                icon.iconHeight: styler.themeIconSizeMedium
+                icon.iconName: styler.iconRefresh
                 text: app.tr("Reroute")
                 onClicked: {
                     app.reroute();
@@ -67,9 +67,9 @@ PagePL {
 
             ToolItemPL {
                 id: clearItem
-                width: row.itemWidth + app.styler.themeHorizontalPageMargin
-                icon.iconHeight: app.styler.themeIconSizeMedium
-                icon.iconName: app.styler.iconClear
+                width: row.itemWidth + styler.themeHorizontalPageMargin
+                icon.iconHeight: styler.themeIconSizeMedium
+                icon.iconName: styler.iconClear
                 text: app.tr("Clear")
                 onClicked: {
                     app.setModeExplore();
@@ -81,7 +81,7 @@ PagePL {
         }
 
         Spacer {
-            height: app.styler.themePaddingLarge
+            height: styler.themePaddingLarge
         }
 
         SectionHeaderPL {
@@ -89,51 +89,51 @@ PagePL {
         }
 
         Spacer {
-            height: app.styler.themePaddingLarge
+            height: styler.themePaddingLarge
         }
 
         Item {
             id: progress
             anchors.left: parent.left
             anchors.right: parent.right
-            height: app.styler.themePaddingSmall
+            height: styler.themePaddingSmall
             Rectangle {
                 id: progressTotal
                 anchors.left: parent.left
-                anchors.leftMargin: app.styler.themeHorizontalPageMargin
+                anchors.leftMargin: styler.themeHorizontalPageMargin
                 anchors.right: parent.right
-                anchors.rightMargin: app.styler.themeHorizontalPageMargin
-                color: app.styler.themePrimaryColor
-                height: app.styler.themePaddingSmall
+                anchors.rightMargin: styler.themeHorizontalPageMargin
+                color: styler.themePrimaryColor
+                height: styler.themePaddingSmall
                 opacity: 0.15
                 radius: height / 2
             }
             Rectangle {
                 id: progressComplete
                 anchors.left: parent.left
-                anchors.leftMargin: app.styler.themeHorizontalPageMargin
-                color: app.styler.themeHighlightColor
-                height: app.styler.themePaddingSmall
+                anchors.leftMargin: styler.themeHorizontalPageMargin
+                color: styler.themeHighlightColor
+                height: styler.themePaddingSmall
                 radius: height / 2
                 width: app.navigationStatus.progress * progressTotal.width
             }
         }
 
         Spacer {
-            height: app.styler.themePaddingLarge + app.styler.themePaddingSmall
+            height: styler.themePaddingLarge + styler.themePaddingSmall
         }
 
         Row {
             // ETA
             anchors.left: parent.left
-            anchors.leftMargin: app.styler.themeHorizontalPageMargin
+            anchors.leftMargin: styler.themeHorizontalPageMargin
             anchors.right: parent.right
-            anchors.rightMargin: app.styler.themeHorizontalPageMargin
-            height: app.styler.themeItemSizeExtraSmall
+            anchors.rightMargin: styler.themeHorizontalPageMargin
+            height: styler.themeItemSizeExtraSmall
             LabelPL {
                 id: eta
-                color: app.styler.themeSecondaryHighlightColor
-                height: app.styler.themeItemSizeExtraSmall
+                color: styler.themeSecondaryHighlightColor
+                height: styler.themeItemSizeExtraSmall
                 text: app.tr("Estimated time of arrival")
                 truncMode: truncModes.fade
                 verticalAlignment: Text.AlignVCenter
@@ -141,7 +141,7 @@ PagePL {
             }
             LabelPL {
                 anchors.baseline: eta.baseline
-                color: app.styler.themeHighlightColor
+                color: styler.themeHighlightColor
                 horizontalAlignment: Text.AlignRight
                 text: app.navigationStatus.destEta
                 truncMode: truncModes.fade
@@ -151,40 +151,6 @@ PagePL {
 
         RouteOverallInfo {
         }
-
-        Spacer {
-            height: app.styler.themePaddingLarge
-        }
-
-        SectionHeaderPL {
-            text: app.tr("Options")
-        }
-
-        Spacer {
-            height: app.styler.themePaddingLarge
-        }
-
-        SliderPL {
-            id: scaleSlider
-            label: app.tr("Map scale")
-            maximumValue: 4.0
-            minimumValue: 0.5
-            stepSize: 0.1
-            value: map.route.mode != null ? app.conf.get("map_scale_navigation_" + map.route.mode) : 1
-            valueText: value
-            visible: map.route.mode != null
-            width: parent.width
-            onValueChanged: {
-                if (map.route.mode == null) return;
-                app.conf.set("map_scale_navigation_" + map.route.mode, scaleSlider.value);
-                if (app.mode === modes.navigate) map.setScale(scaleSlider.value);
-            }
-        }
-
-        Spacer {
-            height: app.styler.themePaddingMedium
-        }
-
     }
 
     onPageStatusActive: app.navigationPageSeen = true

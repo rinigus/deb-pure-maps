@@ -10,7 +10,7 @@ Homepage: https://github.com/rinigus/pure-maps
 
 Package: pure-maps
 Architecture: all
-Depends: ${misc:Depends}, qml-module-mapboxmap, qml-module-io-thp-pyotherside, qml-module-qtpositioning, qml-module-qtmultimedia, qml-module-org-kde-kirigami2, flite, python3-gpxpy, qmlrunner
+Depends: ${misc:Depends}, qml-module-mapboxmap, qml-module-io-thp-pyotherside, qml-module-qtpositioning, qml-module-qtmultimedia, qml-module-org-kde-kirigami2, flite, python3-gpxpy, qmlrunner, qml-module-nemo-dbus
 Description: Maps and navigation
  Pure Maps is an application for Sailfish OS and Linux to display vector
  and raster maps, places, routes, and provide navigation instructions with

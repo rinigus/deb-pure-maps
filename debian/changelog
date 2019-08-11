@@ -1,3 +1,12 @@
+pure-maps (1.22.1-1) unstable; urgency=medium
+
+  * add runtime dependencies
+  * add nemo dbus as dependency
+  * update dependencies
+  * add required kirigami version
+
+ -- Rinigus <rinigus.git@gmail.com>  Sun, 11 Aug 2019 12:09:32 +0300
+
 pure-maps (1.22.0-1) unstable; urgency=medium
 
   * rename pyflakes to pyflakes3

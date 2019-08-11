@@ -1,0 +1,18 @@
+From: Rinigus <rinigus.git@gmail.com>
+Date: Sun, 11 Aug 2019 21:44:02 +0300
+Subject: use wayland qt platform
+
+---
+ data/pure-maps | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/data/pure-maps b/data/pure-maps
+index 1856eaf..b90f39f 100755
+--- a/data/pure-maps
++++ b/data/pure-maps
+@@ -23,4 +23,4 @@ dbus-send --session \
+           /io/github/rinigus/PureMaps \
+           io.github.rinigus.PureMaps.command \
+           array:string:$options > /dev/null 2>&1 || \
+-    exec qmlrunner -P INSTALL_PREFIX/share pure-maps -- "$@"
++    exec qmlrunner -P INSTALL_PREFIX/share pure-maps -platform wayland -- "$@"

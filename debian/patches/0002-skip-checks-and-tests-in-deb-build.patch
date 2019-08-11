@@ -7,10 +7,10 @@ Subject: skip checks and tests in deb build
  1 file changed, 6 insertions(+), 4 deletions(-)
 
 diff --git a/Makefile b/Makefile
-index 86a4600..525589d 100644
+index 985d3e7..085c7c9 100644
 --- a/Makefile
 +++ b/Makefile
-@@ -26,8 +26,9 @@ define install-translation =
+@@ -27,8 +27,9 @@ define install-translation =
  endef
  
  check:
@@ -22,7 +22,7 @@ index 86a4600..525589d 100644
  
  clean:
  	rm -rf dist
-@@ -197,7 +198,8 @@ rpm-silica:
+@@ -209,7 +210,8 @@ rpm-silica:
  	cp $$HOME/rpmbuild/SRPMS/$(RELEASE)-*.rpm rpm
  
  test:

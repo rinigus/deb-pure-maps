@@ -12,7 +12,8 @@ Package: pure-maps
 Architecture: all
 Depends: ${misc:Depends}, qml-module-mapboxmap, qml-module-io-thp-pyotherside, qml-module-qtpositioning,
 	 qml-module-qtmultimedia, qml-module-nemo-dbus, qml-module-qt-labs-settings, qml-module-qtquick-layouts,
-	 qml-module-qtquick-controls2, qml-module-qtquick-window2, qml-module-qtgraphicaleffects, 
+	 qml-module-qtquick-controls2, qml-module-qtquick-window2, qml-module-qtgraphicaleffects,
+	 qtwayland5, 
 	 flite, python3-gpxpy, qmlrunner
 Description: Maps and navigation
  Pure Maps is an application for Sailfish OS and Linux to display vector

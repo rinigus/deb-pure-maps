@@ -207,6 +207,15 @@ PagePL {
                     Spacer {
                         height: styler.themePaddingLarge
                     }
+                }
+            }
+
+            ExpandingSectionPL {
+                id: sectionPrivacy
+                title: app.tr("Privacy")
+                content.sourceComponent: Column {
+                    spacing: styler.themePaddingMedium
+                    width: sectionControls.width
 
                     ListItemLabel {
                         text: app.tr("Clear all history, including search, routes, and destinations. " +
@@ -600,6 +609,14 @@ PagePL {
                         text: app.tr("Tilt map when navigating")
                         onCheckedChanged: {
                             app.conf.set("tilt_when_navigating", tiltSwitch.checked);
+                        }
+                    }
+
+                    TextSwitchPL {
+                        checked: app.conf.smoothPositionAnimationWhenNavigating
+                        text: app.tr("Smooth position animation")
+                        onCheckedChanged: {
+                            app.conf.set("smooth_position_animation_when_navigating", checked);
                         }
                     }
 

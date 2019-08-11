@@ -27,7 +27,7 @@ define install-translation =
 endef
 
 check:
-	pyflakes geocoders guides poor routers
+	python3 -m pyflakes geocoders guides poor routers
 	find . -type f -name "*.json" -exec jsonlint -q {} \;
 
 clean:
@@ -184,9 +184,17 @@ platform-kirigami:
 	rm qml/platform || true
 	ln -s platform.kirigami qml/platform
 
+platform-kirigami24:
+	rm qml/platform || true
+	ln -s platform.kirigami24 qml/platform
+
 platform-silica:
 	rm qml/platform || true
 	ln -s platform.silica qml/platform
+
+platform-ubports:
+	rm qml/platform || true
+	ln -s platform.ubports qml/platform
 
 pot:
 	tools/update-translations

@@ -1,0 +1,1 @@
+../platform.kirigami24/DialogAutoPL.qml
